@@ -21,6 +21,7 @@ pub use tensor::{
 };
 
 pub mod nn;
+pub mod text;
 pub mod vision;
 
 pub mod kind {

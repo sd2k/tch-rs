@@ -15,6 +15,11 @@ pub enum Init {
 
     /// Kaiming uniform initialization.
     KaimingUniform,
+
+    /// Truncated Normal initialization.
+    ///
+    /// See https://discuss.pytorch.org/t/implementing-truncated-normal-initializer/4778/12
+    TruncatedNormal { mean: f64, stdev: f64 },
 }
 
 /// Creates a new float tensor with the specified shape, device, and initialization.
@@ -43,6 +48,12 @@ pub fn init(i: Init, dims: &[i64], device: Device) -> Tensor {
             let bound = (1.0 / fan_in as f64).sqrt();
             Tensor::zeros(dims, (Kind::Float, device)).uniform_(-bound, bound)
         }
+        // https://discuss.pytorch.org/t/implementing-truncated-normal-initializer/4778/12
+        Init::TruncatedNormal { mean, stdev } => Tensor::zeros(dims, (Kind::Float, device))
+            .normal_(0.0, 1.0)
+            .fmod_(2)
+            .g_mul1(stdev)
+            .g_add1(mean),
     }
 }
 
@@ -63,6 +74,16 @@ impl Init {
             }
             Init::Randn { mean, stdev } => {
                 tensor.copy_(&(tensor.randn_like() * stdev + mean));
+            }
+            Init::TruncatedNormal { mean, stdev } => {
+                // https://discuss.pytorch.org/t/implementing-truncated-normal-initializer/4778/12
+                let new = tensor
+                    .zeros_like()
+                    .normal_(0.0, 1.0)
+                    .fmod_(2)
+                    .g_mul1(stdev)
+                    .g_add1(mean);
+                tensor.copy_(&new);
             }
         }
     }

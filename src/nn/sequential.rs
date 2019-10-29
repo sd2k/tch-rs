@@ -138,6 +138,12 @@ impl SequentialT {
         self.add(super::func_t(f))
     }
 
+    /// Append all the layers in `layers` after the existing layers.
+    pub fn append(mut self, mut layers: Vec<Box<dyn ModuleT>>) -> Self {
+        self.layers.append(&mut layers);
+        self
+    }
+
     /// Applies the forward pass and returns the output for each layer.
     pub fn forward_all_t(&self, xs: &Tensor, train: bool, n: Option<usize>) -> Vec<Tensor> {
         if self.layers.is_empty() {

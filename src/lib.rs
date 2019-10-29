@@ -20,6 +20,7 @@ pub use tensor::{
     index, no_grad, no_grad_guard, IndexOp, NewAxis, NoGradGuard, Reduction, Tensor, TensorIndexer,
 };
 
+pub mod collab;
 pub mod nn;
 pub mod vision;
 
